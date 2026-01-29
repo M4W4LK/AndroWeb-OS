@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RetroPhone OS - Frutiger Aero Edition</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Lock Screen -->
+    <div id="lockScreen" class="screen active">
+        <div class="lock-time" id="lockTime">12:00</div>
+        <div class="lock-date" id="lockDate">Thursday, January 29</div>
+        <div class="unlock-slider">
+            <div class="unlock-track">
+                <div class="unlock-handle" id="unlockHandle">
+                    <span>→</span>
+                </div>
+            </div>
+            <div class="unlock-text">Slide to unlock</div>
+        </div>
+    </div>
+
+    <!-- Home Screen -->
+    <div id="homeScreen" class="screen">
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-left">
+                <span class="status-time" id="statusTime">12:00</span>
+            </div>
+            <div class="status-right">
+                <span class="status-icon">📶</span>
+                <span class="status-icon">🔋</span>
+            </div>
+        </div>
+
+        <!-- Wallpaper Container -->
+        <div class="wallpaper-container" id="wallpaperContainer"></div>
+
+        <!-- App Grid -->
+        <div class="app-grid" id="appGrid">
+            <!-- Apps will be dynamically generated -->
+        </div>
+
+        <!-- Dock -->
+        <div class="dock">
+            <button class="dock-btn" data-app="phone">📞</button>
+            <button class="dock-btn" data-app="messages">💬</button>
+            <button class="dock-btn" data-app="browser">🌐</button>
+            <button class="dock-btn" data-app="apps">⊞</button>
+        </div>
+    </div>
+
+    <!-- App Drawer -->
+    <div id="appDrawer" class="screen">
+        <div class="status-bar">
+            <div class="status-left">
+                <span class="status-time">12:00</span>
+            </div>
+            <div class="status-right">
+                <span class="status-icon">📶</span>
+                <span class="status-icon">🔋</span>
+            </div>
+        </div>
+        <div class="app-drawer-header">
+            <h2>Applications</h2>
+            <button class="close-btn" onclick="closeAppDrawer()">✕</button>
+        </div>
+        <div class="app-drawer-grid" id="appDrawerGrid">
+            <!-- All 30 apps will be listed here -->
+        </div>
+    </div>
+
+    <!-- App Container -->
+    <div id="appContainer" class="screen">
+        <!-- Dynamic app content will be loaded here -->
+    </div>
+
+    <!-- Settings App -->
+    <div id="settingsApp" class="app-content">
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">←</button>
+            <h1>Settings</h1>
+        </div>
+        <div class="settings-list">
+            <div class="settings-item" onclick="openWallpaperSettings()">
+                <span class="settings-icon">🖼️</span>
+                <span class="settings-label">Wallpaper</span>
+                <span class="settings-arrow">›</span>
+            </div>
+            <div class="settings-item" onclick="openDisplaySettings()">
+                <span class="settings-icon">💡</span>
+                <span class="settings-label">Display</span>
+                <span class="settings-arrow">›</span>
+            </div>
+            <div class="settings-item" onclick="openSoundSettings()">
+                <span class="settings-icon">🔊</span>
+                <span class="settings-label">Sound</span>
+                <span class="settings-arrow">›</span>
+            </div>
+            <div class="settings-item" onclick="openNetworkSettings()">
+                <span class="settings-icon">📡</span>
+                <span class="settings-label">Network</span>
+                <span class="settings-arrow">›</span>
+            </div>
+            <div class="settings-item" onclick="openStorageSettings()">
+                <span class="settings-icon">💾</span>
+                <span class="settings-label">Storage</span>
+                <span class="settings-arrow">›</span>
+            </div>
+            <div class="settings-item" onclick="openAboutSettings()">
+                <span class="settings-icon">ℹ️</span>
+                <span class="settings-label">About Phone</span>
+                <span class="settings-arrow">›</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calculator App -->
+    <div id="calculatorApp" class="app-content">
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">←</button>
+            <h1>Calculator</h1>
+        </div>
+        <div class="calculator">
+            <div class="calc-display" id="calcDisplay">0</div>
+            <div class="calc-buttons">
+                <button class="calc-btn calc-func" onclick="calcClear()">C</button>
+                <button class="calc-btn calc-func" onclick="calcBackspace()">←</button>
+                <button class="calc-btn calc-func" onclick="calcOperation('%')">%</button>
+                <button class="calc-btn calc-operator" onclick="calcOperation('/')">÷</button>
+                
+                <button class="calc-btn" onclick="calcNumber('7')">7</button>
+                <button class="calc-btn" onclick="calcNumber('8')">8</button>
+                <button class="calc-btn" onclick="calcNumber('9')">9</button>
+                <button class="calc-btn calc-operator" onclick="calcOperation('*')">×</button>
+                
+                <button class="calc-btn" onclick="calcNumber('4')">4</button>
+                <button class="calc-btn" onclick="calcNumber('5')">5</button>
+                <button class="calc-btn" onclick="calcNumber('6')">6</button>
+                <button class="calc-btn calc-operator" onclick="calcOperation('-')">−</button>
+                
+                <button class="calc-btn" onclick="calcNumber('1')">1</button>
+                <button class="calc-btn" onclick="calcNumber('2')">2</button>
+                <button class="calc-btn" onclick="calcNumber('3')">3</button>
+                <button class="calc-btn calc-operator" onclick="calcOperation('+')">+</button>
+                
+                <button class="calc-btn calc-zero" onclick="calcNumber('0')">0</button>
+                <button class="calc-btn" onclick="calcDecimal()">.</button>
+                <button class="calc-btn calc-equals" onclick="calcEquals()">=</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes App -->
+    <div id="notesApp" class="app-content">
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">←</button>
+            <h1>Notes</h1>
+            <button class="add-btn" onclick="createNote()">+</button>
+        </div>
+        <div class="notes-list" id="notesList">
+            <!-- Notes will be listed here -->
+        </div>
+    </div>
+
+    <!-- Snake Game -->
+    <div id="snakeApp" class="app-content">
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">←</button>
+            <h1>Snake</h1>
+        </div>
+        <div class="game-container">
+            <div class="game-score">Score: <span id="snakeScore">0</span></div>
+            <canvas id="snakeCanvas" width="300" height="300"></canvas>
+            <div class="game-controls">
+                <div class="control-row">
+                    <button class="control-btn" onclick="snakeControl('up')">▲</button>
+                </div>
+                <div class="control-row">
+                    <button class="control-btn" onclick="snakeControl('left')">◄</button>
+                    <button class="control-btn" onclick="snakeControl('down')">▼</button>
+                    <button class="control-btn" onclick="snakeControl('right')">►</button>
+                </div>
+            </div>
+            <button class="game-btn" onclick="startSnake()">Start Game</button>
+        </div>
+    </div>
+
+    <!-- Tic Tac Toe Game -->
+    <div id="tictactoeApp" class="app-content">
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">←</button>
+            <h1>Tic Tac Toe</h1>
+        </div>
+        <div class="game-container">
+            <div class="game-score">Player: <span id="tttPlayer">X</span></div>
+            <div class="ttt-board" id="tttBoard">
+                <button class="ttt-cell" onclick="tttMove(0)"></button>
+                <button class="ttt-cell" onclick="tttMove(1)"></button>
+                <button class="ttt-cell" onclick="tttMove(2)"></button>
+                <button class="ttt-cell" onclick="tttMove(3)"></button>
+                <button class="ttt-cell" onclick="tttMove(4)"></button>
+                <button class="ttt-cell" onclick="tttMove(5)"></button>
+                <button class="ttt-cell" onclick="tttMove(6)"></button>
+                <button class="ttt-cell" onclick="tttMove(7)"></button>
+                <button class="ttt-cell" onclick="tttMove(8)"></button>
+            </div>
+            <button class="game-btn" onclick="resetTicTacToe()">New Game</button>
+        </div>
+    </div>
+
+    <!-- Browser App -->
+    <div id="browserApp" class="app-content">
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">←</button>
+            <h1>Browser</h1>
+        </div>
+        <div class="browser-container">
+            <div class="browser-bar">
+                <input type="text" id="browserUrl" placeholder="Search or enter URL" class="browser-input">
+                <button onclick="browserGo()">Go</button>
+            </div>
+            <div class="browser-bookmarks">
+                <button onclick="browserSearch('Google')">Google</button>
+                <button onclick="browserSearch('Wikipedia')">Wikipedia</button>
+                <button onclick="browserSearch('News')">News</button>
+            </div>
+            <div class="browser-content" id="browserContent">
+                <h2>Welcome to RetroPhone Browser</h2>
+                <p>Enter a search term or URL above to browse the web.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="clickSound" preload="auto">
+        <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=" type="audio/wav">
+    </audio>
+
+    <script src="app.js"></script>
+</body>
+</html>
