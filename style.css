@@ -198,7 +198,35 @@ body {
     100% { opacity: 0.8; }
 }
 
-/* App Grid */
+/* App Grid with Swipe Support */
+.app-grid-container {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    z-index: 10;
+}
+
+.app-grid-wrapper {
+    display: flex;
+    height: 100%;
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+.app-grid-page {
+    min-width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    padding: 20px;
+    align-content: start;
+    overflow-y: auto;
+}
+
 .app-grid {
     flex: 1;
     display: grid;
@@ -208,6 +236,31 @@ body {
     z-index: 10;
     align-content: start;
     overflow-y: auto;
+}
+
+/* Page Indicators */
+.page-indicators {
+    position: absolute;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 15;
+}
+
+.indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.indicator.active {
+    background: rgba(255, 255, 255, 0.9);
+    width: 24px;
+    border-radius: 4px;
 }
 
 .app-icon {
@@ -770,6 +823,11 @@ body {
 
 /* Mobile Optimizations */
 @media (max-width: 768px) {
+    .app-grid-page {
+        gap: 15px;
+        padding: 15px;
+    }
+    
     .app-grid {
         gap: 15px;
         padding: 15px;
@@ -794,9 +852,18 @@ body {
         font-size: 20px;
         min-height: 50px;
     }
+    
+    .page-indicators {
+        bottom: 85px;
+    }
 }
 
 @media (max-width: 480px) {
+    .app-grid-page {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+    }
+    
     .app-grid {
         grid-template-columns: repeat(4, 1fr);
         gap: 12px;
@@ -805,6 +872,10 @@ body {
     .app-drawer-grid {
         grid-template-columns: repeat(4, 1fr);
         gap: 12px;
+    }
+    
+    .page-indicators {
+        bottom: 80px;
     }
 }
 
