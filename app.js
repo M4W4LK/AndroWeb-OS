@@ -1,13 +1,208 @@
 // RetroPhone OS - Complete Application System
 
-// System State
+// ============================================
+// SWIPE MANAGER MODULE - Touch Event Handler
+// ============================================
+class SwipeManager {
+    constructor(container, options = {}) {
+        this.container = container;
+        this.wrapper = container.querySelector('.app-grid-wrapper');
+        this.pages = container.querySelectorAll('.app-grid-page');
+        this.indicators = document.querySelectorAll('.indicator');
+        
+        // Configuration
+        this.currentPage = 0;
+        this.totalPages = this.pages.length;
+        this.threshold = options.threshold || 50; // Minimum swipe distance
+        this.maxSwipeTime = options.maxSwipeTime || 300; // Max time for swipe gesture
+        
+        // Touch tracking
+        this.startX = 0;
+        this.startY = 0;
+        this.startTime = 0;
+        this.currentX = 0;
+        this.isDragging = false;
+        this.initialTransform = 0;
+        
+        // Performance optimization
+        this.rafId = null;
+        
+        this.init();
+    }
+    
+    init() {
+        // Touch event listeners
+        this.container.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
+        this.container.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
+        this.container.addEventListener('touchend', this.handleTouchEnd.bind(this));
+        
+        // Mouse events for desktop testing
+        this.container.addEventListener('mousedown', this.handleMouseDown.bind(this));
+        this.container.addEventListener('mousemove', this.handleMouseMove.bind(this));
+        this.container.addEventListener('mouseup', this.handleMouseUp.bind(this));
+        this.container.addEventListener('mouseleave', this.handleMouseUp.bind(this));
+        
+        console.log('SwipeManager initialized - Ready for gesture input');
+    }
+    
+    handleTouchStart(e) {
+        // Don't interfere with scrolling within pages
+        const target = e.target.closest('.app-icon, .dock-btn');
+        if (!target) {
+            this.startSwipe(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    }
+    
+    handleMouseDown(e) {
+        const target = e.target.closest('.app-icon, .dock-btn');
+        if (!target) {
+            this.startSwipe(e.clientX, e.clientY);
+            e.preventDefault();
+        }
+    }
+    
+    startSwipe(x, y) {
+        this.isDragging = true;
+        this.startX = x;
+        this.startY = y;
+        this.currentX = x;
+        this.startTime = Date.now();
+        
+        // Get current transform value
+        const currentTransform = this.wrapper.style.transform;
+        this.initialTransform = currentTransform 
+            ? parseFloat(currentTransform.split('(')[1]) 
+            : -this.currentPage * window.innerWidth;
+        
+        // Remove transition for immediate feedback
+        this.wrapper.style.transition = 'none';
+    }
+    
+    handleTouchMove(e) {
+        if (!this.isDragging) return;
+        
+        this.currentX = e.touches[0].clientX;
+        const currentY = e.touches[0].clientY;
+        
+        const deltaX = this.currentX - this.startX;
+        const deltaY = currentY - this.startY;
+        
+        // If vertical scroll is more dominant, don't hijack the gesture
+        if (Math.abs(deltaY) > Math.abs(deltaX)) {
+            return;
+        }
+        
+        // Prevent default to stop page scrolling during horizontal swipe
+        e.preventDefault();
+        
+        // Use RAF for smooth 60fps animation
+        if (this.rafId) {
+            cancelAnimationFrame(this.rafId);
+        }
+        
+        this.rafId = requestAnimationFrame(() => {
+            this.updateSwipePosition(deltaX);
+        });
+    }
+    
+    handleMouseMove(e) {
+        if (!this.isDragging) return;
+        
+        this.currentX = e.clientX;
+        const deltaX = this.currentX - this.startX;
+        
+        if (this.rafId) {
+            cancelAnimationFrame(this.rafId);
+        }
+        
+        this.rafId = requestAnimationFrame(() => {
+            this.updateSwipePosition(deltaX);
+        });
+    }
+    
+    updateSwipePosition(deltaX) {
+        // Apply rubber band effect at edges
+        let resistance = 1;
+        
+        if ((this.currentPage === 0 && deltaX > 0) || 
+            (this.currentPage === this.totalPages - 1 && deltaX < 0)) {
+            resistance = 0.3; // Stronger resistance at edges
+        }
+        
+        const newPosition = this.initialTransform + (deltaX * resistance);
+        this.wrapper.style.transform = `translateX(${newPosition}px)`;
+    }
+    
+    handleTouchEnd(e) {
+        this.endSwipe();
+    }
+    
+    handleMouseUp(e) {
+        this.endSwipe();
+    }
+    
+    endSwipe() {
+        if (!this.isDragging) return;
+        
+        this.isDragging = false;
+        
+        const deltaX = this.currentX - this.startX;
+        const deltaTime = Date.now() - this.startTime;
+        const velocity = Math.abs(deltaX) / deltaTime;
+        
+        // Restore transition
+        this.wrapper.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        
+        // Determine if swipe was significant enough
+        const isSignificantSwipe = Math.abs(deltaX) > this.threshold || velocity > 0.5;
+        
+        if (isSignificantSwipe) {
+            if (deltaX > 0 && this.currentPage > 0) {
+                // Swipe right - go to previous page
+                this.goToPage(this.currentPage - 1);
+                soundSystem.playClick();
+            } else if (deltaX < 0 && this.currentPage < this.totalPages - 1) {
+                // Swipe left - go to next page
+                this.goToPage(this.currentPage + 1);
+                soundSystem.playClick();
+            } else {
+                // Snap back to current page
+                this.goToPage(this.currentPage);
+            }
+        } else {
+            // Snap back to current page
+            this.goToPage(this.currentPage);
+        }
+        
+        console.log(`Swipe completed - Page: ${this.currentPage}, Delta: ${deltaX}px, Time: ${deltaTime}ms`);
+    }
+    
+    goToPage(pageIndex) {
+        if (pageIndex < 0 || pageIndex >= this.totalPages) return;
+        
+        this.currentPage = pageIndex;
+        const translateX = -pageIndex * window.innerWidth;
+        
+        this.wrapper.style.transform = `translateX(${translateX}px)`;
+        
+        // Update indicators
+        this.indicators.forEach((indicator, index) => {
+            indicator.classList.toggle('active', index === pageIndex);
+        });
+    }
+}
+
+// ============================================
+// SYSTEM STATE & CONFIGURATION
+// ============================================
 const systemState = {
     currentScreen: 'lockScreen',
     currentApp: null,
     soundEnabled: true,
     wallpaper: 'default',
     brightness: 80,
-    network: true
+    network: true,
+    swipeManager: null
 };
 
 // Complete App Registry (30 Apps)
@@ -188,17 +383,25 @@ function updateTime() {
 setInterval(updateTime, 1000);
 updateTime();
 
-// Generate Home Screen Apps (first 8 apps)
+// Generate Home Screen Apps (distributed across 3 pages)
 function generateHomeApps() {
-    const appGrid = document.getElementById('appGrid');
-    const homeApps = appRegistry.slice(0, 8);
+    const pages = document.querySelectorAll('.app-grid-page');
+    const appsPerPage = 8;
     
-    appGrid.innerHTML = homeApps.map(app => `
-        <div class="app-icon" onclick="openApp('${app.id}')">
-            <div class="app-icon-bg">${app.icon}</div>
-            <div class="app-label">${app.name}</div>
-        </div>
-    `).join('');
+    pages.forEach((page, pageIndex) => {
+        const startIndex = pageIndex * appsPerPage;
+        const endIndex = startIndex + appsPerPage;
+        const pageApps = appRegistry.slice(startIndex, endIndex);
+        
+        page.innerHTML = pageApps.map(app => `
+            <div class="app-icon" onclick="openApp('${app.id}')">
+                <div class="app-icon-bg">${app.icon}</div>
+                <div class="app-label">${app.name}</div>
+            </div>
+        `).join('');
+    });
+    
+    console.log('Home screen apps generated across', pages.length, 'pages');
 }
 
 // Generate App Drawer (all 30 apps)
@@ -705,14 +908,30 @@ function openAboutSettings() {
 generateHomeApps();
 generateAppDrawer();
 
-// Prevent default touch behaviors
+// Initialize Swipe Manager for home screen
+const appGridContainer = document.getElementById('appGridContainer');
+if (appGridContainer) {
+    systemState.swipeManager = new SwipeManager(appGridContainer, {
+        threshold: 50,      // 50px minimum swipe
+        maxSwipeTime: 300   // 300ms max swipe duration
+    });
+    console.log('Swipe Manager initialized successfully');
+}
+
+// Prevent default touch behaviors - optimized for swipe
 document.addEventListener('touchmove', function(e) {
+    // Allow swipe in home screen container
+    if (e.target.closest('#appGridContainer')) {
+        // Let SwipeManager handle it
+        return;
+    }
+    
     if (e.target.closest('.unlock-handle')) return;
-    if (e.target.closest('.app-grid')) return;
     if (e.target.closest('.app-drawer-grid')) return;
     if (e.target.closest('.notes-list')) return;
     if (e.target.closest('.browser-content')) return;
-}, { passive: false });
+    if (e.target.closest('.settings-list')) return;
+}, { passive: true });
 
 // Keyboard support for Snake
 document.addEventListener('keydown', (e) => {
