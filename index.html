@@ -37,9 +37,24 @@
         <!-- Wallpaper Container -->
         <div class="wallpaper-container" id="wallpaperContainer"></div>
 
-        <!-- App Grid -->
-        <div class="app-grid" id="appGrid">
-            <!-- Apps will be dynamically generated -->
+        <!-- App Grid Container with Swipe Support -->
+        <div class="app-grid-container" id="appGridContainer">
+            <div class="app-grid-wrapper" id="appGridWrapper">
+                <div class="app-grid-page" data-page="0" id="appGrid">
+                    <!-- Page 1 apps will be here -->
+                </div>
+                <div class="app-grid-page" data-page="1">
+                    <!-- Page 2 apps will be here -->
+                </div>
+                <div class="app-grid-page" data-page="2">
+                    <!-- Page 3 apps will be here -->
+                </div>
+            </div>
+            <div class="page-indicators" id="pageIndicators">
+                <span class="indicator active"></span>
+                <span class="indicator"></span>
+                <span class="indicator"></span>
+            </div>
         </div>
 
         <!-- Dock -->
